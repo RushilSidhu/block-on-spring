@@ -35,6 +35,7 @@ class BlockDiagnostic(Diagnostic):
         self.data = None
         self.component = input_data.get("component", 1)
         self.output_function = None
+        self.csv = None
         
     def inspect_resource(self, resource):
         if "Block:" + self.component in resource:
@@ -51,7 +52,9 @@ class BlockDiagnostic(Diagnostic):
         self.output_function = functions[self.input_data["output_type"]]
         if self.input_data["output_type"] == "csv":
             diagnostic_size = (self.owner.clock.num_steps + 1, 3)
-            self.csv = CSVDiagnosticOutput(self.input_data["filename"], diagnostic_size)
+            self.csv = CSVDiagnosticOutput(
+                            self.input_data["filename"],
+                            diagnostic_size)
 
     def finalize(self):
         self.diagnose()
@@ -66,51 +69,108 @@ class BlockDiagnostic(Diagnostic):
 
 
 class ForwardEuler(ComputeTool):
+    """Implementation of the forward Euler algorithm
+
+    y_{n+1} = y_n + h * f(t_n, y_n)
+    """
     def __init__(self, owner: Simulation, input_data: dict):
         super().__init__(owner, input_data)
         self.dt = None
-        
+
     def initialize(self):
         self.dt = self.owner.clock.dt
-    
+
     def push(self, position, momentum, mass, spring_constant):
         p0 = momentum.copy()
         momentum[:] = momentum - self.dt * spring_constant * position
         position[:] = position + self.dt * p0 / mass
 
 
+class BackwardEuler(ComputeTool):
+    """Implementation of the backward Euler algorithm
+
+    y_{n+1} = y_n + h * f(t_{n+1}, y_{n+1})
+
+    Since the position and momentum are separable for this problem, this
+    algorithm can be rearranged to give
+    alpha = (1 + h^2 * k / m)
+    alpha * x_{n+1} = x_n + h * p_n / m
+            p_{n+1} = p_n + h * (-k * x_{n+1})
+    """
+    def __init__(self, owner: Simulation, input_data: dict):
+        super().__init__(owner, input_data)
+        self.dt = None
+
+    def initialize(self):
+        self.dt = self.owner.clock.dt
+
+    def push(self, position, momentum, mass, spring_constant):
+        factor = 1.0 / (1 + self.dt ** 2 * spring_constant / mass)
+        position[:] = (position + self.dt * momentum / mass) * factor
+        momentum[:] = momentum - self.dt * spring_constant * position
+
+
+class Leapfrog(ComputeTool):
+    """Implementation of the leapfrog algorithm
+
+    x_{n+1} = x_n + h * fx(t_{n}, p_{n})
+    p_{n+1} = p_n + h * fp(t_{n+1}, x_{n+1})
+    """
+    def __init__(self, owner: Simulation, input_data: dict):
+        super().__init__(owner, input_data)
+        self.dt = None
+
+    def initialize(self):
+        self.dt = self.owner.clock.dt
+
+    def push(self, position, momentum, mass, spring_constant):
+        position[:] = position + self.dt * momentum / mass
+        momentum[:] = momentum - self.dt * spring_constant * position
+
+
 PhysicsModule.register("BlockOnSpring", BlockOnSpring)
 Diagnostic.register("BlockDiagnostic", BlockDiagnostic)
 ComputeTool.register("ForwardEuler", ForwardEuler)
+ComputeTool.register("BackwardEuler", BackwardEuler)
+ComputeTool.register("Leapfrog", Leapfrog)
 
-problem_config = {
+
+if __name__ == "__main__":
     # Note: grid isn't used, but "gridless" sims aren't an option yet
-    "Grid": {"N": 2, "x_min": 0, "x_max": 1},
-    "Clock": {"start_time": 0,
-              "end_time": 10,
-              "num_steps": 100},
-    "PhysicsModules": {
-        "BlockOnSpring": {
-            "mass": 1,
-            "spring_constant": 1,
-            "pusher": "ForwardEuler",
-            "x0": [0, 1, 0],
+    problem_config = {
+        "Grid": {"N": 2, "x_min": 0, "x_max": 1},
+        "Clock": {"start_time": 0,
+                  "end_time": 10,
+                  "num_steps": 100},
+        "PhysicsModules": {
+            "BlockOnSpring": {
+                "mass": 1,
+                "spring_constant": 1,
+                "pusher": "Leapfrog",
+                "x0": [0, 1, 0],
+            }
+        },
+        "Tools": {
+            "Leapfrog": {},
+            "ForwardEuler": {},
+        },
+        "Diagnostics": {
+            # default values come first
+            "directory": "output_leapfrog/",
+            "output_type": "csv",
+            "clock": {"filename": "time.csv"},
+            "BlockDiagnostic": [
+                {'component': 'momentum', 'filename': 'block_p.csv'},
+                {'component': 'position', 'filename': 'block_x.csv'}
+            ]
         }
-    },
-    "Tools": {
-        "ForwardEuler": {}
-    },
-    "Diagnostics": {
-        # default values come first
-        "directory": "output/",
-        "output_type": "csv",
-        "clock": {"filename": "time.csv"},
-        "BlockDiagnostic": [
-            {'component': 'momentum', 'filename': 'block_p.csv'},
-            {'component': 'position', 'filename': 'block_x.csv'}
-        ]
     }
-}
 
-sim = Simulation(problem_config)
-sim.run()
+    sim = Simulation(problem_config)
+    sim.run()
+
+    problem_config["PhysicsModules"]["BlockOnSpring"]["pusher"] = "ForwardEuler"
+    problem_config["Diagnostics"]["directory"] = "output_euler/"
+
+    sim = Simulation(problem_config)
+    sim.run()

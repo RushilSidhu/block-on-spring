@@ -4,7 +4,7 @@ import numpy as np
 # import matplotlib.pyplot as plt
 
 from turbopy import Simulation, PhysicsModule, Diagnostic
-from turbopy import CSVDiagnosticOutput, ComputeTool
+from turbopy import CSVOutputUtility, ComputeTool
 
 
 class BlockOnSpring(PhysicsModule):
@@ -52,7 +52,7 @@ class BlockDiagnostic(Diagnostic):
         self.output_function = functions[self.input_data["output_type"]]
         if self.input_data["output_type"] == "csv":
             diagnostic_size = (self.owner.clock.num_steps + 1, 3)
-            self.csv = CSVDiagnosticOutput(
+            self.csv = CSVOutputUtility(
                             self.input_data["filename"],
                             diagnostic_size)
 

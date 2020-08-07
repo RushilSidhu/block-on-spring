@@ -1,7 +1,6 @@
 """Tests for block-on-spring turboPy app"""
 import numpy as np
-import pytest
-from turbopy import Simulation, PhysicsModule
+from turbopy import PhysicsModule, Simulation
 from spring import BlockOnSpring
 
 # Need a "Simulation" object. Maybe need to mock it?

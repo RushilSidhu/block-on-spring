@@ -1,6 +1,6 @@
 """Tests for block-on-spring turboPy app"""
 import numpy as np
-from turbopy import PhysicsModule, Simulation
+from turbopy import Simulation, PhysicsModule
 from spring import BlockOnSpring
 
 # Need a "Simulation" object. Maybe need to mock it?
@@ -49,3 +49,41 @@ def test_BlockOnSpring_attributes():
     # These attributes get set in initialize()
     np.testing.assert_allclose(b.position, config["x0"])
 
+
+def test_bos_forwardeuler():
+    """Tests block_on_spring app with ForwardEuler ComputeTool and compares to
+    output files with a "good" output.
+    """
+
+    for filename in ['block_p', 'block_x', 'time']:
+        ref_data = np.genfromtxt(f'output/output_forwardeuler/{filename}.csv',
+                                 delimiter=',')
+        tmp_data = np.genfromtxt(f'output/output_forwardeuler/{filename}.csv',
+                                 delimiter=',')
+        assert np.allclose(ref_data, tmp_data, rtol=1e-05, atol=1e-08)
+
+
+def test_bos_backwardeuler():
+    """Tests block_on_spring app with BackwardEuler ComputeTool and compares to
+    output files with a "good" output.
+    """
+
+    for filename in ['block_p', 'block_x', 'time']:
+        ref_data = np.genfromtxt(f'output/output_backwardeuler/{filename}.csv',
+                                 delimiter=',')
+        tmp_data = np.genfromtxt(f'output/output_backwardeuler/{filename}.csv',
+                                 delimiter=',')
+        assert np.allclose(ref_data, tmp_data, rtol=1e-05, atol=1e-08)
+
+
+def test_bos_leapfrog():
+    """Tests block_on_spring app with LeapFrog ComputeTool and compares to
+    output files with a "good" output.
+    """
+
+    for filename in ['block_p', 'block_x', 'time']:
+        ref_data = np.genfromtxt(f'output/output_leapfrog/{filename}.csv',
+                                 delimiter=',')
+        tmp_data = np.genfromtxt(f'output/output_leapfrog/{filename}.csv',
+                                 delimiter=',')
+        assert np.allclose(ref_data, tmp_data, rtol=1e-05, atol=1e-08)

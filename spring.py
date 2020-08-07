@@ -9,6 +9,7 @@ from turbopy import CSVOutputUtility, ComputeTool
 
 class BlockOnSpring(PhysicsModule):
     """Use turboPy to compute the motion of a block on a spring"""
+
     def __init__(self, owner: Simulation, input_data: dict):
         super().__init__(owner, input_data)
         self.position = np.zeros((1, 3))
@@ -23,7 +24,7 @@ class BlockOnSpring(PhysicsModule):
     def exchange_resources(self):
         self.publish_resource({"Block:position": self.position})
         self.publish_resource({"Block:momentum": self.momentum})
-    
+
     def update(self):
         self.push(self.position, self.momentum,
                   self.mass, self.spring_constant)
@@ -36,11 +37,11 @@ class BlockDiagnostic(Diagnostic):
         self.component = input_data.get("component", 1)
         self.output_function = None
         self.csv = None
-        
+
     def inspect_resource(self, resource):
         if "Block:" + self.component in resource:
             self.data = resource["Block:" + self.component]
-    
+
     def diagnose(self):
         self.output_function(self.data[0, :])
 
@@ -53,8 +54,8 @@ class BlockDiagnostic(Diagnostic):
         if self.input_data["output_type"] == "csv":
             diagnostic_size = (self.owner.clock.num_steps + 1, 3)
             self.csv = CSVOutputUtility(
-                            self.input_data["filename"],
-                            diagnostic_size)
+                self.input_data["filename"],
+                diagnostic_size)
 
     def finalize(self):
         self.diagnose()
@@ -73,6 +74,7 @@ class ForwardEuler(ComputeTool):
 
     y_{n+1} = y_n + h * f(t_n, y_n)
     """
+
     def __init__(self, owner: Simulation, input_data: dict):
         super().__init__(owner, input_data)
         self.dt = None
@@ -97,6 +99,7 @@ class BackwardEuler(ComputeTool):
     alpha * x_{n+1} = x_n + h * p_n / m
             p_{n+1} = p_n + h * (-k * x_{n+1})
     """
+
     def __init__(self, owner: Simulation, input_data: dict):
         super().__init__(owner, input_data)
         self.dt = None
@@ -116,6 +119,7 @@ class Leapfrog(ComputeTool):
     x_{n+1} = x_n + h * fx(t_{n}, p_{n})
     p_{n+1} = p_n + h * fp(t_{n+1}, x_{n+1})
     """
+
     def __init__(self, owner: Simulation, input_data: dict):
         super().__init__(owner, input_data)
         self.dt = None
@@ -137,7 +141,7 @@ ComputeTool.register("Leapfrog", Leapfrog)
 
 if __name__ == "__main__":
     # Note: grid isn't used, but "gridless" sims aren't an option yet
-    problem_config = {
+    block_config = {
         "Grid": {"N": 2, "x_min": 0, "x_max": 1},
         "Clock": {"start_time": 0,
                   "end_time": 10,
@@ -166,11 +170,11 @@ if __name__ == "__main__":
         }
     }
 
-    sim = Simulation(problem_config)
+    sim = Simulation(block_config)
     sim.run()
 
-    problem_config["PhysicsModules"]["BlockOnSpring"]["pusher"] = "ForwardEuler"
-    problem_config["Diagnostics"]["directory"] = "output_euler/"
+    block_config["PhysicsModules"]["BlockOnSpring"]["pusher"] = "ForwardEuler"
+    block_config["Diagnostics"]["directory"] = "output_euler/"
 
-    sim = Simulation(problem_config)
+    sim = Simulation(block_config)
     sim.run()

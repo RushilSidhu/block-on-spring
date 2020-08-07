@@ -82,20 +82,11 @@ def bos_run():
         }
     }
 
-    block_config["PhysicsModules"]["BlockOnSpring"]["pusher"] = "ForwardEuler"
-    block_config["Diagnostics"]["directory"] = "test_data/test_output/output_euler/"
-    sim = Simulation(block_config)
-    sim.run()
-
-    block_config["PhysicsModules"]["BlockOnSpring"]["pusher"] = "Leapfrog"
-    block_config["Diagnostics"]["directory"] = "test_data/test_output/output_leapfrog/"
-    sim = Simulation(block_config)
-    sim.run()
-
-    block_config["PhysicsModules"]["BlockOnSpring"]["pusher"] = "BackwardEuler"
-    block_config["Diagnostics"]["directory"] = "test_data/test_output/output_backward_euler/"
-    sim = Simulation(block_config)
-    sim.run()
+    for tool in block_config["Tools"]:
+        block_config["PhysicsModules"]["BlockOnSpring"]["pusher"] = tool
+        block_config["Diagnostics"]["directory"] = f"test_data/test_output/output_{tool}/"
+        sim = Simulation(block_config)
+        sim.run()
 
 
 bos_run()
@@ -107,9 +98,9 @@ def test_bos_forwardeuler():
     """
 
     for filename in ['block_p', 'block_x', 'time']:
-        ref_data = np.genfromtxt(f'test_data/reference_output/output_euler/{filename}.csv',
+        ref_data = np.genfromtxt(f'test_data/reference_output/output_ForwardEuler/{filename}.csv',
                                  delimiter=',')
-        tmp_data = np.genfromtxt(f'test_data/test_output/output_euler/{filename}.csv',
+        tmp_data = np.genfromtxt(f'test_data/test_output/output_ForwardEuler/{filename}.csv',
                                  delimiter=',')
         assert np.allclose(ref_data, tmp_data, rtol=1e-05, atol=1e-08)
 
@@ -120,9 +111,9 @@ def test_bos_backwardeuler():
     """
 
     for filename in ['block_p', 'block_x', 'time']:
-        ref_data = np.genfromtxt(f'test_data/reference_output/output_backward_euler/{filename}.csv',
+        ref_data = np.genfromtxt(f'test_data/reference_output/output_BackwardEuler/{filename}.csv',
                                  delimiter=',')
-        tmp_data = np.genfromtxt(f'test_data/test_output/output_backward_euler/{filename}.csv',
+        tmp_data = np.genfromtxt(f'test_data/test_output/output_BackwardEuler/{filename}.csv',
                                  delimiter=',')
         assert np.allclose(ref_data, tmp_data, rtol=1e-05, atol=1e-08)
 
@@ -133,8 +124,8 @@ def test_bos_leapfrog():
     """
 
     for filename in ['block_p', 'block_x', 'time']:
-        ref_data = np.genfromtxt(f'test_data/reference_output/output_leapfrog/{filename}.csv',
+        ref_data = np.genfromtxt(f'test_data/reference_output/output_Leapfrog/{filename}.csv',
                                  delimiter=',')
-        tmp_data = np.genfromtxt(f'test_data/test_output/output_leapfrog/{filename}.csv',
+        tmp_data = np.genfromtxt(f'test_data/test_output/output_Leapfrog/{filename}.csv',
                                  delimiter=',')
         assert np.allclose(ref_data, tmp_data, rtol=1e-05, atol=1e-08)

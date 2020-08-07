@@ -1,5 +1,6 @@
 """Tests for block-on-spring turboPy app"""
 import numpy as np
+import pytest
 from turbopy import Simulation, PhysicsModule
 from spring import BlockOnSpring
 
@@ -50,15 +51,65 @@ def test_BlockOnSpring_attributes():
     np.testing.assert_allclose(b.position, config["x0"])
 
 
+def bos_run():
+    block_config = {
+        "Grid": {"N": 2, "x_min": 0, "x_max": 1},
+        "Clock": {"start_time": 0,
+                  "end_time": 10,
+                  "num_steps": 100},
+        "PhysicsModules": {
+            "BlockOnSpring": {
+                "mass": 1,
+                "spring_constant": 1,
+                "pusher": "Leapfrog",
+                "x0": [0, 1, 0],
+            }
+        },
+        "Tools": {
+            "Leapfrog": {},
+            "ForwardEuler": {},
+            "BackwardEuler": {}
+        },
+        "Diagnostics": {
+            # default values come first
+            "directory": "test_output/",
+            "output_type": "csv",
+            "clock": {"filename": "time.csv"},
+            "BlockDiagnostic": [
+                {'component': 'momentum', 'filename': 'block_p.csv'},
+                {'component': 'position', 'filename': 'block_x.csv'}
+            ]
+        }
+    }
+
+    block_config["PhysicsModules"]["BlockOnSpring"]["pusher"] = "ForwardEuler"
+    block_config["Diagnostics"]["directory"] = "test_data/test_output/output_euler/"
+    sim = Simulation(block_config)
+    sim.run()
+
+    block_config["PhysicsModules"]["BlockOnSpring"]["pusher"] = "Leapfrog"
+    block_config["Diagnostics"]["directory"] = "test_data/test_output/output_leapfrog/"
+    sim = Simulation(block_config)
+    sim.run()
+
+    block_config["PhysicsModules"]["BlockOnSpring"]["pusher"] = "BackwardEuler"
+    block_config["Diagnostics"]["directory"] = "test_data/test_output/output_backward_euler/"
+    sim = Simulation(block_config)
+    sim.run()
+
+
+bos_run()
+
+
 def test_bos_forwardeuler():
     """Tests block_on_spring app with ForwardEuler ComputeTool and compares to
     output files with a "good" output.
     """
 
     for filename in ['block_p', 'block_x', 'time']:
-        ref_data = np.genfromtxt(f'output/output_forwardeuler/{filename}.csv',
+        ref_data = np.genfromtxt(f'test_data/reference_output/output_euler/{filename}.csv',
                                  delimiter=',')
-        tmp_data = np.genfromtxt(f'output/output_forwardeuler/{filename}.csv',
+        tmp_data = np.genfromtxt(f'test_data/test_output/output_euler/{filename}.csv',
                                  delimiter=',')
         assert np.allclose(ref_data, tmp_data, rtol=1e-05, atol=1e-08)
 
@@ -69,9 +120,9 @@ def test_bos_backwardeuler():
     """
 
     for filename in ['block_p', 'block_x', 'time']:
-        ref_data = np.genfromtxt(f'output/output_backwardeuler/{filename}.csv',
+        ref_data = np.genfromtxt(f'test_data/reference_output/output_backward_euler/{filename}.csv',
                                  delimiter=',')
-        tmp_data = np.genfromtxt(f'output/output_backwardeuler/{filename}.csv',
+        tmp_data = np.genfromtxt(f'test_data/test_output/output_backward_euler/{filename}.csv',
                                  delimiter=',')
         assert np.allclose(ref_data, tmp_data, rtol=1e-05, atol=1e-08)
 
@@ -82,8 +133,8 @@ def test_bos_leapfrog():
     """
 
     for filename in ['block_p', 'block_x', 'time']:
-        ref_data = np.genfromtxt(f'output/output_leapfrog/{filename}.csv',
+        ref_data = np.genfromtxt(f'test_data/reference_output/output_leapfrog/{filename}.csv',
                                  delimiter=',')
-        tmp_data = np.genfromtxt(f'output/output_leapfrog/{filename}.csv',
+        tmp_data = np.genfromtxt(f'test_data/test_output/output_leapfrog/{filename}.csv',
                                  delimiter=',')
         assert np.allclose(ref_data, tmp_data, rtol=1e-05, atol=1e-08)

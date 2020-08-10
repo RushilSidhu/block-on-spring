@@ -101,7 +101,7 @@ def test_bos_forwardeuler():
                                  delimiter=',')
         tmp_data = np.genfromtxt(f'test_data/test_output/output_ForwardEuler/{filename}.csv',
                                  delimiter=',')
-        assert np.allclose(ref_data, tmp_data, rtol=1e-05, atol=1e-08)
+        assert np.allclose(ref_data, tmp_data)
 
 
 def test_bos_backwardeuler():
@@ -114,7 +114,7 @@ def test_bos_backwardeuler():
                                  delimiter=',')
         tmp_data = np.genfromtxt(f'test_data/test_output/output_BackwardEuler/{filename}.csv',
                                  delimiter=',')
-        assert np.allclose(ref_data, tmp_data, rtol=1e-05, atol=1e-08)
+        assert np.allclose(ref_data, tmp_data)
 
 
 def test_bos_leapfrog():
@@ -127,4 +127,4 @@ def test_bos_leapfrog():
                                  delimiter=',')
         tmp_data = np.genfromtxt(f'test_data/test_output/output_Leapfrog/{filename}.csv',
                                  delimiter=',')
-        assert np.allclose(ref_data, tmp_data, rtol=1e-05, atol=1e-08)
+        assert np.allclose(ref_data, tmp_data)

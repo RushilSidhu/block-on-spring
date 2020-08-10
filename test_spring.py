@@ -54,7 +54,7 @@ def test_BlockOnSpring_attributes(sim):
 
 
 @pytest.fixture
-def bos_run():
+def bos_config():
     block_config = {
         "Grid": {"N": 2, "x_min": 0, "x_max": 1},
         "Clock": {"start_time": 0,
@@ -85,18 +85,18 @@ def bos_run():
         }
     }
 
-    for tool in block_config["Tools"]:
-        block_config["PhysicsModules"]["BlockOnSpring"]["pusher"] = tool
-        block_config["Diagnostics"]["directory"] = f"test_data/test_output/output_{tool}/"
-        sim = Simulation(block_config)
-        sim.run()
+    return block_config
 
 
-def test_bos_forwardeuler(bos_run):
+
+def test_bos_forwardeuler(bos_config):
     """Tests block_on_spring app with ForwardEuler ComputeTool and compares to
     output files with a "good" output.
     """
-
+    bos_config["PhysicsModules"]["BlockOnSpring"]["pusher"] = "ForwardEuler"
+    bos_config["Diagnostics"]["directory"] = "test_data/test_output/output_ForwardEuler/"
+    sim = Simulation(bos_config)
+    sim.run()
     for filename in ['block_p', 'block_x', 'time']:
         ref_data = np.genfromtxt(f'test_data/reference_output/output_ForwardEuler/{filename}.csv',
                                  delimiter=',')
@@ -105,11 +105,14 @@ def test_bos_forwardeuler(bos_run):
         assert np.allclose(ref_data, tmp_data)
 
 
-def test_bos_backwardeuler(bos_run):
+def test_bos_backwardeuler(bos_config):
     """Tests block_on_spring app with BackwardEuler ComputeTool and compares to
     output files with a "good" output.
     """
-
+    bos_config["PhysicsModules"]["BlockOnSpring"]["pusher"] = "BackwardEuler"
+    bos_config["Diagnostics"]["directory"] = "test_data/test_output/output_BackwardEuler/"
+    sim = Simulation(bos_config)
+    sim.run()
     for filename in ['block_p', 'block_x', 'time']:
         ref_data = np.genfromtxt(f'test_data/reference_output/output_BackwardEuler/{filename}.csv',
                                  delimiter=',')
@@ -118,11 +121,14 @@ def test_bos_backwardeuler(bos_run):
         assert np.allclose(ref_data, tmp_data)
 
 
-def test_bos_leapfrog(bos_run):
+def test_bos_leapfrog(bos_config):
     """Tests block_on_spring app with LeapFrog ComputeTool and compares to
     output files with a "good" output.
     """
-
+    bos_config["PhysicsModules"]["BlockOnSpring"]["pusher"] = "Leapfrog"
+    bos_config["Diagnostics"]["directory"] = "test_data/test_output/output_Leapfrog/"
+    sim = Simulation(bos_config)
+    sim.run()
     for filename in ['block_p', 'block_x', 'time']:
         ref_data = np.genfromtxt(f'test_data/reference_output/output_Leapfrog/{filename}.csv',
                                  delimiter=',')

@@ -1,21 +1,25 @@
 """Tests for block-on-spring turboPy app"""
 import numpy as np
+import pytest
 from turbopy import PhysicsModule, Simulation
 from spring import BlockOnSpring
 
-# Need a "Simulation" object. Maybe need to mock it?
-input_data = {
-    "Tools": {"ForwardEuler": {}},
-    "Grid": {"min": 1, "max": 2, "N": 3},
-    "Clock": {"start_time": 0, "end_time": 1, "dt": 1},
-    "PhysicsModules": {},
-    "Diagnostics": {},
-    }
-sim = Simulation(input_data)
-sim.prepare_simulation()
+
+@pytest.fixture
+def sim():
+    input_data = {
+        "Tools": {"ForwardEuler": {}},
+        "Grid": {"min": 1, "max": 2, "N": 3},
+        "Clock": {"start_time": 0, "end_time": 1, "dt": 1},
+        "PhysicsModules": {},
+        "Diagnostics": {},
+        }
+    sim = Simulation(input_data)
+    sim.prepare_simulation()
+    return sim
 
 
-def test_sim_config():
+def test_sim_config(sim):
     assert sim.find_tool_by_name("ForwardEuler") is not None
 
 
@@ -24,32 +28,32 @@ def test_BlockOnSpring_subclass():
     assert issubclass(BlockOnSpring, PhysicsModule)
 
 
-def test_BlockOnSpring_instance():
+def test_BlockOnSpring_instance(sim):
     """Test instantiating a BlockOnSpring object"""
     min_config = {"pusher": "ForwardEuler"}
     b = BlockOnSpring(sim, min_config)
     assert isinstance(b, BlockOnSpring)
 
 
-def test_BlockOnSpring_attributes():
+def test_BlockOnSpring_attributes(sim):
     """Test setting attributes for a BlockOnSpring"""
     config = {
-                "mass": 1,
-                "spring_constant": 1,
-                "pusher": "ForwardEuler",
-                "x0": [[0, 1, 0]],
-            }
+            "mass": 1,
+            "spring_constant": 1,
+            "pusher": "ForwardEuler",
+            "x0": [[0, 1, 0]],
+              }
     b = BlockOnSpring(sim, config)
     # These attributes get set in __init__()
     assert b.mass == 1
     assert b.spring_constant == 1
     np.testing.assert_allclose(b.position, [[0, 0, 0]])
-
     b.initialize()
     # These attributes get set in initialize()
     np.testing.assert_allclose(b.position, config["x0"])
 
 
+@pytest.fixture
 def bos_run():
     block_config = {
         "Grid": {"N": 2, "x_min": 0, "x_max": 1},
@@ -88,10 +92,7 @@ def bos_run():
         sim.run()
 
 
-bos_run()
-
-
-def test_bos_forwardeuler():
+def test_bos_forwardeuler(bos_run):
     """Tests block_on_spring app with ForwardEuler ComputeTool and compares to
     output files with a "good" output.
     """
@@ -104,7 +105,7 @@ def test_bos_forwardeuler():
         assert np.allclose(ref_data, tmp_data)
 
 
-def test_bos_backwardeuler():
+def test_bos_backwardeuler(bos_run):
     """Tests block_on_spring app with BackwardEuler ComputeTool and compares to
     output files with a "good" output.
     """
@@ -117,7 +118,7 @@ def test_bos_backwardeuler():
         assert np.allclose(ref_data, tmp_data)
 
 
-def test_bos_leapfrog():
+def test_bos_leapfrog(bos_run):
     """Tests block_on_spring app with LeapFrog ComputeTool and compares to
     output files with a "good" output.
     """

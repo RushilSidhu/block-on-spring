@@ -91,19 +91,21 @@ def bos_fixture():
     return block_config
 
 
-
 def test_bos_forwardeuler(bos_config):
     """Tests block_on_spring app with ForwardEuler ComputeTool and compares to
     output files with a "good" output.
     """
     bos_config["PhysicsModules"]["BlockOnSpring"]["pusher"] = "ForwardEuler"
-    bos_config["Diagnostics"]["directory"] = "test_data/test_output/output_ForwardEuler/"
+    bos_config["Diagnostics"]["directory"] = "test_data/test_output/"\
+        "output_ForwardEuler/"
     sim = Simulation(bos_config)
     sim.run()
     for filename in ['block_p', 'block_x', 'time']:
-        ref_data = np.genfromtxt(f'test_data/reference_output/output_ForwardEuler/{filename}.csv',
+        ref_data = np.genfromtxt('test_data/reference_output/'
+                                 f'output_ForwardEuler/{filename}.csv',
                                  delimiter=',')
-        tmp_data = np.genfromtxt(f'test_data/test_output/output_ForwardEuler/{filename}.csv',
+        tmp_data = np.genfromtxt('test_data/test_output/'
+                                 f'output_ForwardEuler/{filename}.csv',
                                  delimiter=',')
         assert np.allclose(ref_data, tmp_data)
 
@@ -113,13 +115,16 @@ def test_bos_backwardeuler(bos_config):
     output files with a "good" output.
     """
     bos_config["PhysicsModules"]["BlockOnSpring"]["pusher"] = "BackwardEuler"
-    bos_config["Diagnostics"]["directory"] = "test_data/test_output/output_BackwardEuler/"
+    bos_config["Diagnostics"]["directory"] = "test_data/test_output/"\
+        "output_BackwardEuler/"
     sim = Simulation(bos_config)
     sim.run()
     for filename in ['block_p', 'block_x', 'time']:
-        ref_data = np.genfromtxt(f'test_data/reference_output/output_BackwardEuler/{filename}.csv',
+        ref_data = np.genfromtxt('test_data/reference_output/'
+                                 f'output_BackwardEuler/{filename}.csv',
                                  delimiter=',')
-        tmp_data = np.genfromtxt(f'test_data/test_output/output_BackwardEuler/{filename}.csv',
+        tmp_data = np.genfromtxt('test_data/test_output/'
+                                 f'output_BackwardEuler/{filename}.csv',
                                  delimiter=',')
         assert np.allclose(ref_data, tmp_data)
 
@@ -129,12 +134,15 @@ def test_bos_leapfrog(bos_config):
     output files with a "good" output.
     """
     bos_config["PhysicsModules"]["BlockOnSpring"]["pusher"] = "Leapfrog"
-    bos_config["Diagnostics"]["directory"] = "test_data/test_output/output_Leapfrog/"
+    bos_config["Diagnostics"]["directory"] = "test_data/test_output/"\
+        "output_Leapfrog/"
     sim = Simulation(bos_config)
     sim.run()
     for filename in ['block_p', 'block_x', 'time']:
-        ref_data = np.genfromtxt(f'test_data/reference_output/output_Leapfrog/{filename}.csv',
+        ref_data = np.genfromtxt('test_data/reference_output/'
+                                 f'output_Leapfrog/{filename}.csv',
                                  delimiter=',')
-        tmp_data = np.genfromtxt(f'test_data/test_output/output_Leapfrog/{filename}.csv',
+        tmp_data = np.genfromtxt('test_data/test_output/'
+                                 f'output_Leapfrog/{filename}.csv',
                                  delimiter=',')
         assert np.allclose(ref_data, tmp_data)

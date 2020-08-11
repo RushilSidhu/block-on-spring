@@ -5,8 +5,9 @@ from turbopy import PhysicsModule, Simulation
 from spring import BlockOnSpring
 
 
-@pytest.fixture
-def sim():
+@pytest.fixture(name="sim")
+def simulation_fixture():
+    """Creates a simulation object used to create a B.O.S. object"""
     input_data = {
         "Tools": {"ForwardEuler": {}},
         "Grid": {"min": 1, "max": 2, "N": 3},
@@ -14,47 +15,49 @@ def sim():
         "PhysicsModules": {},
         "Diagnostics": {},
         }
-    sim = Simulation(input_data)
-    sim.prepare_simulation()
-    return sim
+    simulation = Simulation(input_data)
+    simulation.prepare_simulation()
+    return simulation
 
 
 def test_sim_config(sim):
+    """Test tool configuration"""
     assert sim.find_tool_by_name("ForwardEuler") is not None
 
 
-def test_BlockOnSpring_subclass():
+def test_subclass():
     """Test main PhysicsModule class"""
     assert issubclass(BlockOnSpring, PhysicsModule)
 
 
-def test_BlockOnSpring_instance(sim):
+def test_instance(sim):
     """Test instantiating a BlockOnSpring object"""
     min_config = {"pusher": "ForwardEuler"}
-    b = BlockOnSpring(sim, min_config)
-    assert isinstance(b, BlockOnSpring)
+    block_instance = BlockOnSpring(sim, min_config)
+    assert isinstance(block_instance, BlockOnSpring)
 
 
-def test_BlockOnSpring_attributes(sim):
+def test_attributes(sim):
     """Test setting attributes for a BlockOnSpring"""
     config = {
-            "mass": 1,
-            "spring_constant": 1,
-            "pusher": "ForwardEuler",
-            "x0": [[0, 1, 0]],
-              }
-    b = BlockOnSpring(sim, config)
+        "mass": 1,
+        "spring_constant": 1,
+        "pusher": "ForwardEuler",
+        "x0": [[0, 1, 0]],
+        }
+    block = BlockOnSpring(sim, config)
     # These attributes get set in __init__()
-    assert b.mass == 1
-    assert b.spring_constant == 1
-    np.testing.assert_allclose(b.position, [[0, 0, 0]])
-    b.initialize()
+    assert block.mass == 1
+    assert block.spring_constant == 1
+    np.testing.assert_allclose(block.position, [[0, 0, 0]])
+    block.initialize()
     # These attributes get set in initialize()
-    np.testing.assert_allclose(b.position, config["x0"])
+    np.testing.assert_allclose(block.position, config["x0"])
 
 
-@pytest.fixture
-def bos_config():
+@pytest.fixture(name="bos_config")
+def bos_fixture():
+    """Returns a dictionary of input data to create a B.O.S object"""
     block_config = {
         "Grid": {"N": 2, "x_min": 0, "x_max": 1},
         "Clock": {"start_time": 0,

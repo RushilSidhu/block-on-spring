@@ -10,7 +10,6 @@ def simulation_fixture():
     """Creates a simulation object used to create a B.O.S. object"""
     input_data = {
         "Tools": {"ForwardEuler": {}},
-        "Grid": {"min": 1, "max": 2, "N": 3},
         "Clock": {"start_time": 0, "end_time": 1, "dt": 1},
         "PhysicsModules": {},
         "Diagnostics": {},
@@ -59,7 +58,6 @@ def test_attributes(sim):
 def bos_fixture():
     """Returns a dictionary of input data to create a B.O.S object"""
     block_config = {
-        "Grid": {"N": 2, "x_min": 0, "x_max": 1},
         "Clock": {"start_time": 0,
                   "end_time": 10,
                   "num_steps": 100},

@@ -2,6 +2,7 @@ from turbopy import Simulation
 import spring
 
 problem_config = {
+    "Grid": {"N": 2, "x_min": 0, "x_max": 1},
     "Clock": {"start_time": 0,
               "end_time": 10,
               "num_steps": 100},

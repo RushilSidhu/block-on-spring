@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import spring
 
 class Uncertainty:
-    def __init__(self, mean_K, mean_M, sd_K = 0,  sd_M = 0):
+    def __init__(self, mean_K, mean_M, sd_K = 0,  sd_M = 0): # Initializes an Uncertainty object that can self randomize and run the turboPy Physics Module on itself.
         self.mean_K = mean_K
         self.mean_M = mean_M
         self.sd_K = sd_K
@@ -15,9 +15,8 @@ class Uncertainty:
     def randomizeVars(self):
         self.springConstant = np.random.normal(self.mean_K, self.sd_K)
         self.mass = np.random.normal(self.mean_M, self.sd_M)
-        #return (springConstant , mass)
 
-    def run(self,t0,t1,steps):
+    def run(self,t0,t1,steps): # Uses the turboPy Physics Module for the Block on Spring problem.
         problem_config = {
             "Grid": {"N": 2, "x_min": 0, "x_max": 1},
             "Clock": {"start_time": t0,
@@ -56,8 +55,8 @@ class Uncertainty:
 
         retDct = {}
         for i in range(len(time)):
-            retDct[time[i][0]] = (momentum[i],position[i])
-        return retDct#[(time[i][0],momentum[i],position[i]) for i in range(len(time))]
+            retDct[time[i][0]] = (momentum[i],position[i])  # Stores everything in a dictionary witth the structure dict[time] = (momentum at time, position at time)
+        return retDct
 
 class MonteCarlo:
     def __init__(self,runner, n, t0 = 0, t1 = 12, steps = 1200):   #Runner is an object from the class Uncertainty and n is the number of runs
@@ -72,10 +71,10 @@ class MonteCarlo:
         
         self.dataDct = dataDct
 
-    def displayMaxMomentum(self, title, xMin = 0, xMax = 0): 
+    def displayMaxMomentum(self, title, xMin = 0, xMax = 0):  # xMin and xMax represent the range of the graph.
 
         histData = []
-        for key in self.dataDct:
+        for key in self.dataDct: # Simple max value finder for each iteration of mass and spring constant.
             tempMaxMomentum = -1
             for t in self.dataDct[key]:
                 if(self.dataDct[key][t][0] > tempMaxMomentum):
@@ -83,10 +82,10 @@ class MonteCarlo:
             histData += [tempMaxMomentum]
 
         if(xMin != xMax):
-            n, bins, patches = plt.hist(histData, 50, facecolor='blue', alpha=0.5, range=[xMin,xMax])
+            plt.hist(histData, 50, facecolor='blue', alpha=0.5, range=[xMin,xMax])
 
         else:
-            n, bins, patches = plt.hist(histData, 50, facecolor='blue', alpha=0.5)
+            plt.hist(histData, 50, facecolor='blue', alpha=0.5)
 
         plt.title(title)
         plt.xlabel('Momentum')

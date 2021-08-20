@@ -4,12 +4,12 @@ import spring
 import Uncertainty as UQ
 
 
-meanSpringConstant = 3
+meanSpringConstant = 3 # mean (center) of the spring constant graph.
 meanMass = 1
-stdSpringConstant = 0.05
+stdSpringConstant = 0.05 # standard deviation of the spring constant
 stdMass = 0.05
 
-runner = UQ.Uncertainty(meanSpringConstant,meanMass,stdSpringConstant,stdMass)
+runner = UQ.Uncertainty(meanSpringConstant, meanMass, stdSpringConstant, stdMass)
 
 mc = UQ.MonteCarlo(runner, 1000)
 

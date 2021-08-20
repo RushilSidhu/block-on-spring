@@ -84,8 +84,8 @@ class ForwardEuler(ComputeTool):
 
     def push(self, position, momentum, mass, spring_constant):
         p0 = momentum.copy()
-        momentum[:] = momentum - self.dt * spring_constant * position
         position[:] = position + self.dt * p0 / mass
+        momentum[:] = momentum - self.dt * spring_constant * position
 
 
 class BackwardEuler(ComputeTool):

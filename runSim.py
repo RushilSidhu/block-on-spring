@@ -1,37 +1,17 @@
 from turbopy import Simulation
 import matplotlib.pyplot as plt
 import spring
-import Uncertainty as UQ
-
-
-meanSpringConstant = 3
-meanMass = 1
-stdSpringConstant = 0.05
-stdMass = 0.05
-
-runner = UQ.Uncertainty(meanSpringConstant,meanMass,stdSpringConstant,stdMass)
-
-mc = UQ.MonteCarlo(runner, 1000)
-
-mc.displayMaxMomentum("Test")
-
-
-
-
-
-# Below this is just a display of the block on spring problem with no uncertainty.
-
-
+import Uncertainty
 
 problem_config = {
     "Grid": {"N": 2, "x_min": 0, "x_max": 1},
     "Clock": {"start_time": 0,
-            "end_time": 12,
-            "num_steps": 1200},
+              "end_time": 100,
+              "num_steps": 1000},
     "PhysicsModules": {
         "BlockOnSpring": {
-            "mass": meanMass,
-            "spring_constant": meanSpringConstant,
+            "mass": 1,
+            "spring_constant": 1,
             "pusher": "Leapfrog",
             "x0": [0, 1, 0],
         }
@@ -52,6 +32,8 @@ problem_config = {
     }
 }
 
+sim = Simulation(problem_config)
+sim.run()
 
 problem_config["PhysicsModules"]["BlockOnSpring"]["pusher"] = "ForwardEuler"
 problem_config["Diagnostics"]["directory"] = "output_euler/"
@@ -59,14 +41,14 @@ problem_config["Diagnostics"]["directory"] = "output_euler/"
 sim = Simulation(problem_config)
 sim.run()
 
+mc = Uncertainty.Uncertainty(1,1,10,10)
 
+print(mc.getMonteCarlo())
 
 time = sim.diagnostics[0].csv._buffer
 momentum = sim.diagnostics[1].csv._buffer[:,1]
 position = sim.diagnostics[2].csv._buffer[:,1]
-plt.plot(time, momentum)
-plt.plot(time, position)
+plt.plot(position, momentum)
 plt.xlabel('time')
-plt.title('position (orange) , momentum (blue)')
+plt.ylabel('position')
 plt.show()
-
